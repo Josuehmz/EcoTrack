@@ -60,6 +60,30 @@ Respuesta real del servicio, verificada con `curl`:
 - **`VIBE-REPORT.md`:** reflexión sobre la configuración y el flujo (495
   palabras).
 - **`.replit`:** configuración del Repl para correr y desplegar.
+- **Capturas:** `docs/capturas/`, Cursor y Replit operando juntos.
+
+## Despliegue en Replit
+
+- **Repl:** https://replit.com/@JosueHernande15/EcoTrack
+- **App publicada:** https://eco-track--josuehernande15.replit.app
+  (despliegue Autoscale, 2 vCPU / 4 GiB, región South America, visibilidad
+  pública)
+
+El Repl se creó importando este repositorio; el agente de Replit adaptó el
+arranque del proyecto a su entorno, así que lo que corre allá puede diferir en
+la capa de infraestructura de lo que hay en `main`. La fuente de verdad del
+código es este repositorio.
+
+## Capturas: Cursor y Replit en conjunto
+
+El agente de Replit importando y publicando el proyecto, con `.cursorrules`
+abierto en Cursor al lado:
+
+![Cursor y el agente de Replit trabajando en conjunto](docs/capturas/cursor-y-replit-agente.png)
+
+La app publicada en su URL de Replit, con el mismo archivo de reglas en Cursor:
+
+![La app publicada en Replit junto a Cursor](docs/capturas/cursor-y-replit-app.png)
 
 ## Lo que este prototipo NO es
 
@@ -73,17 +97,6 @@ Está escrito en el código y se repite acá porque importa:
 - **El motor de IA no se ha ejecutado**: en esta máquina no había
   `ANTHROPIC_API_KEY`, así que ese camino compila y está tipado, pero no está
   probado contra la API. Lo verificado de punta a punta es el motor por reglas.
-- **El `.replit` no se ha probado en Replit**: se escribió según su formato
-  documentado, pero quien lo suba debe confirmar que el Repl arranca.
 - El analizador entiende un vocabulario acotado de español colombiano. Lo que
   no reconoce lo devuelve en `sinReconocer` en vez de descartarlo: un total bajo
   y creíble sería el peor resultado posible.
-
-## Pendiente de la entrega
-
-1. Importar este repositorio en Replit (Create Repl → Import from GitHub) y
-   pegar la URL del Repl desplegado.
-2. Tomar la **captura de pantalla** con Cursor y Replit operando juntos: el
-   proyecto abierto en Cursor (con `.cursorrules` visible en el editor y el
-   Composer/chat a la derecha) y, al lado, el Repl corriendo con la app en el
-   navegador. Esa captura solo la puede tomar quien tenga las dos cuentas.
