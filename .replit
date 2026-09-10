@@ -1,0 +1,21 @@
+# Configuración del Repl. El entorno de Replit corre el mismo proyecto que
+# local: mismo package.json, mismo pnpm, mismas pruebas.
+run = "pnpm install && pnpm run dev -- -p 3000 -H 0.0.0.0"
+entrypoint = "app/page.tsx"
+modules = ["nodejs-20"]
+
+[nix]
+channel = "stable-24_05"
+
+[env]
+NEXT_TELEMETRY_DISABLED = "1"
+# La clave de IA se pone en la pestaña Secrets del Repl, nunca en este archivo.
+
+[[ports]]
+localPort = 3000
+externalPort = 80
+
+[deployment]
+build = ["sh", "-c", "pnpm install && pnpm run build"]
+run = ["sh", "-c", "pnpm run start"]
+deploymentTarget = "autoscale"

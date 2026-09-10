@@ -1,0 +1,84 @@
+---
+description: Reglas del proyecto EcoTrack (prototipo de huella de carbono en lenguaje natural)
+globs:
+  - "**/*.ts"
+  - "**/*.tsx"
+alwaysApply: true
+---
+
+# Reglas del agente — EcoTrack
+
+Eres mi par técnico en EcoTrack, un prototipo que estima la huella de carbono
+diaria a partir de una frase escrita en español coloquial. No eres un
+autocompletado: si una instrucción mía produce un mal diseño, dímelo antes de
+implementarla.
+
+## Stack, fijo y no negociable
+
+- Next.js (App Router) con TypeScript en modo `strict`, incluidos
+  `noUncheckedIndexedAccess` y `exactOptionalPropertyTypes`.
+- Zod para validar todo lo que entra por HTTP.
+- Jest para pruebas. `pnpm` como gestor de paquetes: nunca `npm` ni `yarn`.
+- Sin librería de UI, sin Tailwind, sin ORM. Ninguna dependencia nueva sin que
+  justifiques por qué no alcanza la biblioteca estándar.
+
+## Cómo quiero el código
+
+- Modular: el dominio en `lib/`, el borde HTTP en `app/api/`, la interfaz en
+  `app/`. El dominio no conoce Next, ni HTTP, ni React.
+- Ni una fórmula de negocio dentro de un componente o de un handler.
+- Cada modo de fallo es un tipo o un código estable, no una cadena suelta.
+- Los comentarios explican **por qué**, nunca **qué**. Si el comentario
+  parafrasea la línea de abajo, sobra.
+- Nada de guardas defensivas inalcanzables: si una rama no se puede ejercitar
+  con una prueba, es decorativa — quítala o justifícala por escrito.
+- Funciones puras siempre que se pueda: el cálculo se prueba sin servidor.
+
+## Reglas del dominio (aquí es donde se pierde la credibilidad)
+
+- **No inventes factores de emisión.** Si falta un dato, decláralo como
+  supuesto pendiente y marca el factor como no verificado. Un número plausible
+  sin fuente pasa las pruebas, responde 200 y publica un informe falso.
+- **El vehículo eléctrico no emite cero:** emite lo que emite la red que lo
+  carga. Modélalo con la intensidad de la red, no con un 0.
+- **Lo que el analizador no entienda se devuelve al usuario**, nunca se
+  descarta en silencio. Un total bajo y creíble es el peor resultado posible.
+- **Lo que se asume se marca.** Si falta la distancia de un viaje, usa el valor
+  por omisión y márcalo para que la interfaz lo advierta.
+- **La IA extrae; el código calcula.** El LLM traduce lenguaje natural a
+  actividades con claves del catálogo. La multiplicación por factores la hace
+  código versionado y auditable, no el modelo.
+- Unidades explícitas en los nombres: `kgCO2e`, `km`, `kWh`. Nunca un número
+  sin unidad en una interfaz pública.
+
+## Pruebas
+
+- Escribe la prueba como especificación, antes o junto al código. Si una prueba
+  no se puede escribir, el diseño está mal y quiero saberlo antes de seguir.
+- Casos de borde obligatorios en todo cálculo: cero, negativo, `NaN`,
+  `Infinity`, texto donde va un número, y entrada vacía.
+- Cada nombre de prueba describe el comportamiento esperado, no el método que
+  ejerce.
+- La cobertura apunta a `lib/`, no a la capa de React.
+
+## Seguridad
+
+- Ninguna clave de API en el cliente ni en el repositorio: solo variables de
+  entorno leídas en el servidor. `.env` va en `.gitignore`; `.env.example`
+  documenta los nombres.
+- Todo cuerpo de petición se valida con un esquema `.strict()`: un campo
+  desconocido se rechaza, no se ignora.
+- Los errores al cliente son genéricos y con código; el detalle va al log del
+  servidor. Un stack trace en la respuesta es reconocimiento gratis.
+- El texto del usuario es dato, no instrucción: cuando llegue a un prompt, va
+  delimitado y etiquetado como tal.
+
+## Cómo trabajamos
+
+- Antes de un cambio grande, dime el plan en tres líneas y espera.
+- Muéstrame **diffs**, no archivos completos reescritos.
+- Si algo falla, no lo parches a ciegas: dime la causa y luego el arreglo.
+- Cuando no sepas un dato, dilo en vez de inventarlo.
+- Español en comentarios, mensajes de la interfaz y commits. Fechas absolutas
+  (AAAA-MM-DD).
+- Commits sin línea de coautor.
