@@ -109,3 +109,159 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .pie { margin-top: 36px; color: var(--suave); font-size: 0.82rem; border-top: 1px solid var(--borde); padding-top: 16px; }
 .error { color: #b3261e; margin-top: 16px; }
 .motor { font-size: 0.78rem; color: var(--suave); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* ---- EcoTrack AI: interfaz de chat para negocios ----
+   Minimalista y en verdes: la pantalla la mira un dueño de negocio con prisa,
+   así que el único elemento grande es el número, y el color solo se usa para
+   separar lo que dijo él de lo que respondió la app. */
+
+.chat {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 20px 32px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--borde);
+}
+
+.chat-header h1 { font-size: 1.5rem; }
+.chat-header p { color: var(--suave); margin: 4px 0 0; font-size: 0.94rem; }
+
+.marcador {
+  text-align: right;
+  background: var(--acento-suave);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 8px 14px;
+  white-space: nowrap;
+}
+.marcador strong { display: block; font-size: 1.5rem; letter-spacing: -0.02em; }
+.marcador span { color: var(--suave); font-size: 0.76rem; }
+
+.hilo { flex: 1; padding: 20px 0; display: flex; flex-direction: column; gap: 22px; }
+
+.vacio { color: var(--suave); font-size: 0.95rem; padding: 28px 0; }
+.vacio em { color: var(--texto); font-style: normal; }
+
+.turno { display: flex; flex-direction: column; gap: 10px; }
+
+.burbuja-usuario {
+  align-self: flex-end;
+  max-width: 80%;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 14px 14px 2px 14px;
+  background: var(--acento);
+  color: #fff;
+}
+
+.burbuja-error {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 14px 14px 14px 2px;
+  background: var(--alerta-suave);
+  color: var(--alerta);
+  border: 1px solid var(--borde);
+}
+
+.burbuja-analisis {
+  align-self: flex-start;
+  width: 100%;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 14px 14px 14px 2px;
+  padding: 16px 18px;
+}
+
+.total-linea {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 10px;
+}
+.total-linea strong { font-size: 1.7rem; letter-spacing: -0.02em; }
+.total-linea span { color: var(--suave); font-size: 0.84rem; }
+.total-linea .motor {
+  margin-left: auto;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.68rem;
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.titular { margin: 0 0 12px; font-size: 0.94rem; color: var(--suave); }
+.titular strong { color: var(--texto); }
+
+.items { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--borde); }
+.items li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--borde);
+  font-size: 0.92rem;
+}
+.items small { color: var(--suave); font-weight: 400; }
+.items .cantidad { color: var(--suave); font-variant-numeric: tabular-nums; }
+.items .kg { font-variant-numeric: tabular-nums; font-weight: 600; min-width: 72px; text-align: right; }
+
+.recomendaciones { margin-top: 16px; }
+.recomendaciones h2 {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--suave);
+  margin: 0 0 8px;
+}
+.recomendacion {
+  background: var(--acento-suave);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+.recomendacion .accion {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 0.94rem;
+}
+.recomendacion .ahorro { color: var(--acento); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.recomendacion .porque { margin: 4px 0 0; font-size: 0.86rem; color: var(--suave); }
+
+.aviso { margin: 10px 0 0; font-size: 0.84rem; color: var(--alerta); }
+.pensando { color: var(--suave); font-size: 0.9rem; }
+
+.compositor { border-top: 1px solid var(--borde); padding-top: 14px; }
+.compositor .fila { display: flex; gap: 10px; }
+.compositor input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  background: var(--superficie);
+  color: inherit;
+  font: inherit;
+}
+.compositor input:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
+.compositor .pie { margin: 10px 0 0; font-size: 0.78rem; color: var(--suave); border: 0; padding: 0; }
+.compositor .pie a { color: var(--acento); }
+
+@media (max-width: 560px) {
+  .items li { grid-template-columns: 1fr auto; }
+  .items .cantidad { grid-column: 1 / -1; }
+}

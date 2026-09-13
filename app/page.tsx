@@ -1,160 +1,223 @@
 'use client';
 
-import { useState } from 'react';
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
 
-import type { Estimacion } from '@/lib/types';
+import type { Analisis } from '@/lib/types';
 
 const EJEMPLOS = [
-  'Hoy comí carne y viajé 20km en bus',
-  'Desayuné huevos con pan y café, fui en bici a la universidad',
-  'Almorcé pollo con arroz, 12 km en carro y gasté 3 kWh',
-  'Me eché un tinto y cogí el TransMilenio 15 km',
+  'Hoy usamos 5 camionetas de reparto y gastamos 200kWh de luz',
+  'Hicimos 40 domicilios en moto y sacamos 25 kg de basura',
+  'Dos camiones hicieron 120 km en total y gastamos 45 m3 de gas',
+  'Tres camionetas, 60 km cada una, y reciclamos 18 kg',
 ];
 
-const UNIDADES: Record<string, string> = { km: 'km', porcion: 'porción(es)', kWh: 'kWh' };
+const UNIDADES: Record<string, string> = {
+  km: 'km',
+  porcion: 'porción(es)',
+  kWh: 'kWh',
+  m3: 'm³',
+  kg: 'kg',
+};
+
+const CATEGORIAS: Record<string, string> = {
+  flota: 'Flota',
+  energia: 'Energía',
+  residuos: 'Residuos',
+  transporte: 'Transporte',
+  alimentacion: 'Alimentación',
+};
+
+interface Turno {
+  readonly id: number;
+  readonly texto: string;
+  readonly analisis: Analisis | null;
+  readonly error: string | null;
+}
 
 export default function Pagina() {
   const [texto, setTexto] = useState('');
+  const [turnos, setTurnos] = useState<Turno[]>([]);
   const [cargando, setCargando] = useState(false);
-  const [resultado, setResultado] = useState<Estimacion | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const finRef = useRef<HTMLDivElement>(null);
 
-  async function estimar(entrada: string) {
+  // El hilo crece hacia abajo: sin esto, la respuesta nueva queda fuera de
+  // pantalla y el dueño del negocio cree que no pasó nada.
+  useEffect(() => {
+    finRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [turnos, cargando]);
+
+  const totalDia = turnos.reduce((suma, turno) => suma + (turno.analisis?.totalKgCO2e ?? 0), 0);
+  const totalRedondeado = Math.round(totalDia * 100) / 100;
+
+  async function enviar(entrada: string) {
+    const limpio = entrada.trim();
+    if (limpio.length < 3 || cargando) return;
+
+    setTexto('');
     setCargando(true);
-    setError(null);
+    const id = Date.now();
+
     try {
       const respuesta = await fetch('/api/estimate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ texto: entrada }),
+        body: JSON.stringify({ texto: limpio }),
       });
       const cuerpo = await respuesta.json();
-      if (!respuesta.ok) {
-        setError(cuerpo?.error?.mensaje ?? 'No se pudo estimar.');
-        setResultado(null);
-        return;
-      }
-      setResultado(cuerpo.data as Estimacion);
+      setTurnos((previos) => [
+        ...previos,
+        respuesta.ok
+          ? { id, texto: limpio, analisis: cuerpo.data as Analisis, error: null }
+          : { id, texto: limpio, analisis: null, error: cuerpo?.error?.mensaje ?? 'No se pudo analizar.' },
+      ]);
     } catch {
-      setError('No se pudo contactar el servicio.');
-      setResultado(null);
+      setTurnos((previos) => [
+        ...previos,
+        { id, texto: limpio, analisis: null, error: 'No se pudo contactar el servicio.' },
+      ]);
     } finally {
       setCargando(false);
     }
   }
 
   return (
-    <main>
-      <header>
-        <h1>EcoTrack</h1>
-        <p>Escribe lo que hiciste hoy, en tus palabras. Te devuelvo un estimado de tu huella.</p>
+    <main className="chat">
+      <header className="chat-header">
+        <div>
+          <h1>EcoTrack AI</h1>
+          <p>Cuéntame el día de tu negocio y te digo cuánto pesó.</p>
+        </div>
+        {turnos.length > 0 && (
+          <div className="marcador" aria-live="polite">
+            <strong>{totalRedondeado}</strong>
+            <span>kg CO₂e hoy</span>
+          </div>
+        )}
       </header>
 
+      <section className="hilo">
+        {turnos.length === 0 && (
+          <div className="vacio">
+            <p>
+              Escríbelo como se lo contarías a un socio: <em>&ldquo;Hoy usamos 5 camionetas de
+              reparto y gastamos 200kWh de luz&rdquo;</em>. Sin formularios.
+            </p>
+          </div>
+        )}
+
+        {turnos.map((turno) => (
+          <article key={turno.id} className="turno">
+            <p className="burbuja-usuario">{turno.texto}</p>
+
+            {turno.error !== null && <p className="burbuja-error">{turno.error}</p>}
+
+            {turno.analisis !== null && <Analisis analisis={turno.analisis} />}
+          </article>
+        ))}
+
+        {cargando && <p className="pensando">Analizando…</p>}
+        <div ref={finRef} />
+      </section>
+
       <form
+        className="compositor"
         onSubmit={(evento) => {
           evento.preventDefault();
-          if (texto.trim().length >= 3) void estimar(texto);
+          void enviar(texto);
         }}
       >
-        <textarea
-          value={texto}
-          onChange={(evento) => setTexto(evento.target.value)}
-          placeholder="Hoy comí carne y viajé 20km en bus"
-          maxLength={600}
-          aria-label="Describe tu día"
-        />
-        <div className="fila">
-          <button type="submit" disabled={cargando || texto.trim().length < 3}>
-            {cargando ? 'Estimando…' : 'Estimar mi huella'}
-          </button>
-          {resultado !== null && (
-            <span className="motor">
-              motor: {resultado.motor === 'ia' ? 'IA (Claude)' : 'reglas locales'}
-            </span>
-          )}
-        </div>
         <div className="ejemplos">
           {EJEMPLOS.map((ejemplo) => (
-            <button
-              key={ejemplo}
-              type="button"
-              onClick={() => {
-                setTexto(ejemplo);
-                void estimar(ejemplo);
-              }}
-            >
+            <button key={ejemplo} type="button" disabled={cargando} onClick={() => void enviar(ejemplo)}>
               {ejemplo}
             </button>
           ))}
         </div>
+        <div className="fila">
+          <input
+            value={texto}
+            onChange={(evento) => setTexto(evento.target.value)}
+            placeholder="Hoy usamos 5 camionetas de reparto y gastamos 200kWh de luz"
+            maxLength={600}
+            aria-label="Describe la actividad de tu negocio"
+          />
+          <button type="submit" disabled={cargando || texto.trim().length < 3}>
+            {cargando ? '…' : 'Analizar'}
+          </button>
+        </div>
+        <p className="pie">
+          Estimación con factores sin verificar: sirve para comparar decisiones, no para reportar.{' '}
+          <Link href="/personal">¿Eres una persona y no un negocio?</Link>
+        </p>
       </form>
-
-      {error !== null && <p className="error">{error}</p>}
-
-      {resultado !== null && (
-        <section aria-live="polite">
-          <div className="total">
-            <strong>{resultado.totalKgCO2e} kg CO₂e</strong>
-            <span>
-              equivale a manejar unos {resultado.equivaleAKmEnCarro} km en carro a gasolina ·
-              transporte {resultado.porCategoria.transporte} · alimentación{' '}
-              {resultado.porCategoria.alimentacion} · energía {resultado.porCategoria.energia}
-            </span>
-          </div>
-
-          {resultado.items.length > 0 && (
-            <table>
-              <thead>
-                <tr>
-                  <th>Actividad</th>
-                  <th className="num">Cantidad</th>
-                  <th className="num">kg CO₂e</th>
-                </tr>
-              </thead>
-              <tbody>
-                {resultado.items.map((item, indice) => (
-                  <tr key={`${item.etiqueta}-${indice}`}>
-                    <td>
-                      {item.etiqueta}
-                      {!item.verificado && (
-                        <span title={item.fuente} style={{ color: 'var(--suave)' }}>
-                          {' '}
-                          *
-                        </span>
-                      )}
-                    </td>
-                    <td className="num">
-                      {item.cantidad} {UNIDADES[item.unidad] ?? item.unidad}
-                    </td>
-                    <td className="num">{item.kgCO2e}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-
-          {resultado.sinReconocer.length > 0 && (
-            <div className="avisos">
-              <p>
-                <strong>No entendí esto:</strong> {resultado.sinReconocer.join(' · ')}
-              </p>
-            </div>
-          )}
-
-          {resultado.advertencias.length > 0 && (
-            <div className="avisos">
-              {resultado.advertencias.map((aviso) => (
-                <p key={aviso}>{aviso}</p>
-              ))}
-            </div>
-          )}
-
-          <p className="pie">
-            * factor de emisión sin verificar. Este prototipo estima órdenes de magnitud para
-            comparar hábitos; no sirve para reportar emisiones.
-          </p>
-        </section>
-      )}
     </main>
+  );
+}
+
+function Analisis({ analisis }: { analisis: Analisis }) {
+  const mayor = analisis.mayorContribuyente;
+
+  return (
+    <div className="burbuja-analisis">
+      <p className="total-linea">
+        <strong>{analisis.totalKgCO2e} kg CO₂e</strong>
+        <span>≈ {analisis.equivaleAKmEnCarro} km en carro</span>
+        <span className="motor">{analisis.motor === 'ia' ? 'IA' : 'reglas'}</span>
+      </p>
+
+      {mayor !== null && analisis.items.length > 1 && (
+        <p className="titular">
+          Lo que más pesa hoy: <strong>{mayor.etiqueta}</strong>, {mayor.kgCO2e} kg.
+        </p>
+      )}
+
+      {analisis.items.length > 0 && (
+        <ul className="items">
+          {analisis.items.map((item, indice) => (
+            <li key={`${item.clave}-${indice}`}>
+              <span className="etiqueta">
+                {item.etiqueta}
+                <small> · {CATEGORIAS[item.categoria] ?? item.categoria}</small>
+              </span>
+              <span className="cantidad">
+                {item.cantidad} {UNIDADES[item.unidad] ?? item.unidad}
+                {item.detalle !== undefined && <small> ({item.detalle})</small>}
+              </span>
+              <span className="kg">{item.kgCO2e} kg</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {analisis.recomendaciones.length > 0 && (
+        <div className="recomendaciones">
+          <h2>Qué puedes hacer mañana</h2>
+          {analisis.recomendaciones.map((recomendacion) => (
+            <div key={recomendacion.titulo} className="recomendacion">
+              <p className="accion">
+                {recomendacion.titulo}
+                <span className="ahorro">
+                  −{recomendacion.ahorroKgCO2e} kg ({recomendacion.ahorroPorcentaje}%)
+                </span>
+              </p>
+              <p className="porque">{recomendacion.detalle}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {analisis.sinReconocer.length > 0 && (
+        <p className="aviso">
+          <strong>No entendí:</strong> {analisis.sinReconocer.join(' · ')}. El total no lo incluye.
+        </p>
+      )}
+
+      {analisis.advertencias.map((advertencia) => (
+        <p key={advertencia} className="aviso">
+          {advertencia}
+        </p>
+      ))}
+    </div>
   );
 }

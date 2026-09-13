@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { estimar } from '@/lib/estimate';
 import { analizarConIA, hayMotorIA } from '@/lib/llm';
 import { analizarConReglas } from '@/lib/parser';
+import { mayorContribuyente, recomendar } from '@/lib/recomendacion';
 
 const CuerpoPeticion = z
   .object({
@@ -43,7 +44,14 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   try {
     const parseo = usarIA ? await analizarConIA(texto) : analizarConReglas(texto);
-    return NextResponse.json({ data: estimar(parseo) });
+    const estimacion = estimar(parseo);
+    return NextResponse.json({
+      data: {
+        ...estimacion,
+        recomendaciones: recomendar(estimacion),
+        mayorContribuyente: mayorContribuyente(estimacion),
+      },
+    });
   } catch (error) {
     if (!usarIA) {
       // Fallar aquí sin IA significa un defecto propio: no hay red de la cual
@@ -63,6 +71,8 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({
       data: {
         ...estimacion,
+        recomendaciones: recomendar(estimacion),
+        mayorContribuyente: mayorContribuyente(estimacion),
         advertencias: [
           'El motor de IA no respondió; el resultado viene del analizador por reglas.',
           ...estimacion.advertencias,

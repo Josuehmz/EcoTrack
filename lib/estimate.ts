@@ -7,7 +7,13 @@ import type { Actividad, Categoria, Estimacion, ItemEstimado, ResultadoParseo } 
  * factores, no esta multiplicación.
  */
 
-const CATEGORIAS: readonly Categoria[] = ['transporte', 'alimentacion', 'energia'];
+const CATEGORIAS: readonly Categoria[] = [
+  'transporte',
+  'alimentacion',
+  'energia',
+  'flota',
+  'residuos',
+];
 
 function redondear(valor: number, decimales = 2): number {
   const escala = 10 ** decimales;
@@ -46,6 +52,7 @@ export function estimar(parseo: ResultadoParseo): Estimacion {
 
     items.push({
       categoria: actividad.categoria,
+      clave: actividad.clave,
       etiqueta: factor.etiqueta,
       cantidad: redondear(actividad.cantidad, 3),
       unidad: factor.unidad,
@@ -54,11 +61,17 @@ export function estimar(parseo: ResultadoParseo): Estimacion {
       fuente: factor.fuente,
       verificado: factor.verificado,
       textoOrigen: actividad.textoOrigen,
+      ...(actividad.detalle !== undefined ? { detalle: actividad.detalle } : {}),
     });
 
     if (actividad.cantidadAsumida === true) {
+      // Cuando hay `detalle`, la advertencia muestra la cuenta completa
+      // ("5 x 40 km asumidos por vehiculo"), que es lo que el dueño del
+      // negocio necesita para corregirla en una frase.
       advertencias.push(
-        `No dijiste la distancia de "${factor.etiqueta}": se asumieron ${actividad.cantidad} km. Corrígelo si fue otra.`,
+        actividad.detalle === undefined
+          ? `No dijiste la distancia de "${factor.etiqueta}": se asumieron ${actividad.cantidad} km. Corrígelo si fue otra.`
+          : `${factor.etiqueta}: ${actividad.detalle}. Corrígelo si fue otra cifra.`,
       );
     }
   }

@@ -14,7 +14,7 @@
  * advertirla.
  */
 
-export type Unidad = 'km' | 'porcion' | 'kWh';
+export type Unidad = 'km' | 'porcion' | 'kWh' | 'm3' | 'kg';
 
 export interface Factor {
   /** Etiqueta legible para la interfaz. */
@@ -31,6 +31,9 @@ export interface Factor {
 const FUENTE_ALIMENTOS = 'Orden de magnitud de literatura pública sobre huella de alimentos (sin verificar)';
 const FUENTE_TRANSPORTE = 'Orden de magnitud de factores públicos de transporte de pasajeros (sin verificar)';
 const FUENTE_ENERGIA = 'Intensidad aproximada de una red eléctrica con alta participación hidroeléctrica (sin verificar)';
+const FUENTE_COMBUSTION = 'Orden de magnitud de la combustión de gas natural y GLP (sin verificar)';
+const FUENTE_FLOTA = 'Orden de magnitud de factores públicos de vehículos comerciales, por km de vehículo (sin verificar)';
+const FUENTE_RESIDUOS = 'Orden de magnitud de residuos a relleno sanitario frente a reciclaje (sin verificar)';
 
 export const TRANSPORTE = {
   bus: { etiqueta: 'Bus urbano', kgCO2ePorUnidad: 0.1, unidad: 'km', fuente: FUENTE_TRANSPORTE, verificado: false },
@@ -63,14 +66,37 @@ export const ALIMENTOS = {
 
 export const ENERGIA = {
   electricidad: { etiqueta: 'Electricidad', kgCO2ePorUnidad: 0.16, unidad: 'kWh', fuente: FUENTE_ENERGIA, verificado: false },
+  gas_natural: { etiqueta: 'Gas natural', kgCO2ePorUnidad: 2, unidad: 'm3', fuente: FUENTE_COMBUSTION, verificado: false },
+  glp: { etiqueta: 'GLP (gas propano)', kgCO2ePorUnidad: 3, unidad: 'kg', fuente: FUENTE_COMBUSTION, verificado: false },
+} as const satisfies Record<string, Factor>;
+
+/**
+ * Flota comercial. El factor es por kilómetro **de vehículo**, no por pasajero:
+ * una camioneta de reparto no reparte su huella entre ocupantes, la carga
+ * entera el negocio. Confundir las dos bases es el error clásico al pasar de
+ * una calculadora personal a una empresarial.
+ */
+export const FLOTA = {
+  camioneta: { etiqueta: 'Camioneta de reparto (diésel)', kgCO2ePorUnidad: 0.25, unidad: 'km', fuente: FUENTE_FLOTA, verificado: false },
+  camioneta_electrica: { etiqueta: 'Camioneta eléctrica', kgCO2ePorUnidad: 0.05, unidad: 'km', fuente: FUENTE_ENERGIA, verificado: false },
+  furgon: { etiqueta: 'Furgón', kgCO2ePorUnidad: 0.35, unidad: 'km', fuente: FUENTE_FLOTA, verificado: false },
+  camion: { etiqueta: 'Camión', kgCO2ePorUnidad: 0.85, unidad: 'km', fuente: FUENTE_FLOTA, verificado: false },
+  moto_domicilio: { etiqueta: 'Moto de domicilios', kgCO2ePorUnidad: 0.1, unidad: 'km', fuente: FUENTE_FLOTA, verificado: false },
+} as const satisfies Record<string, Factor>;
+
+export const RESIDUOS = {
+  residuos: { etiqueta: 'Residuos a relleno sanitario', kgCO2ePorUnidad: 0.5, unidad: 'kg', fuente: FUENTE_RESIDUOS, verificado: false },
+  residuos_reciclados: { etiqueta: 'Residuos reciclados', kgCO2ePorUnidad: 0.05, unidad: 'kg', fuente: FUENTE_RESIDUOS, verificado: false },
 } as const satisfies Record<string, Factor>;
 
 export type ClaveTransporte = keyof typeof TRANSPORTE;
 export type ClaveAlimento = keyof typeof ALIMENTOS;
 export type ClaveEnergia = keyof typeof ENERGIA;
-export type ClaveFactor = ClaveTransporte | ClaveAlimento | ClaveEnergia;
+export type ClaveFlota = keyof typeof FLOTA;
+export type ClaveResiduo = keyof typeof RESIDUOS;
+export type ClaveFactor = ClaveTransporte | ClaveAlimento | ClaveEnergia | ClaveFlota | ClaveResiduo;
 
-const TODOS: Record<string, Factor> = { ...TRANSPORTE, ...ALIMENTOS, ...ENERGIA };
+const TODOS: Record<string, Factor> = { ...TRANSPORTE, ...ALIMENTOS, ...ENERGIA, ...FLOTA, ...RESIDUOS };
 
 export function factorDe(clave: string): Factor | undefined {
   // Se consulta con `hasOwnProperty` para que una clave heredada del prototipo

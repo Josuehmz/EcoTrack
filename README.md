@@ -2,18 +2,27 @@
 
 **Repositorio:** https://github.com/Josuehmz/EcoTrack
 
-Prototipo (MVP) que estima la huella de carbono del día a partir de una frase
-escrita en lenguaje natural: *"Hoy comí carne y viajé 20km en bus"* → **11 kg
-CO₂e**, con el desglose y las advertencias de lo que no entendió.
+MVP que estima la huella de carbono a partir de una frase en lenguaje natural,
+sin formularios. Dos productos sobre el mismo motor:
+
+- **`/` — EcoTrack AI, para negocios** (capstone). Interfaz de chat: *"Hoy
+  usamos 5 camionetas de reparto y gastamos 200kWh de luz"* → **82 kg CO₂e**,
+  con el desglose, el supuesto visible (*5 × 40 km asumidos*) y qué hacer
+  mañana (*cambiar la camioneta por una eléctrica: −40 kg, 48,8%*).
+- **`/personal` — EcoTrack, para personas** (trabajo anterior). *"Hoy comí carne
+  y viajé 20km en bus"* → **11 kg CO₂e**.
 
 Construido con **vibe coding**: el código lo escribió un agente de IA (Claude
 Opus 5) dirigido por el `.cursorrules` de este repositorio.
+
+**Documentos del capstone:** [`docs/MASTER-PROMPT.md`](docs/MASTER-PROMPT.md) ·
+[`docs/CAPSTONE-BITACORA.md`](docs/CAPSTONE-BITACORA.md)
 
 ## Cómo correrlo
 
 ```bash
 pnpm install
-pnpm test          # 37 pruebas
+pnpm test          # 66 pruebas
 pnpm run typecheck # tsc --noEmit
 pnpm run dev       # http://localhost:3000
 ```
@@ -21,7 +30,7 @@ pnpm run dev       # http://localhost:3000
 Con `pnpm run build && pnpm run start` queda listo para producción (es lo que
 usa el despliegue de Replit).
 
-## Los dos motores
+## Los dos motores de comprensión
 
 Por omisión EcoTrack analiza la frase con un **analizador por reglas** en
 `lib/parser.ts`: corre sin clave de API, sin red, sin costo por consulta y es
@@ -40,18 +49,34 @@ IA falla, la respuesta cae al analizador por reglas y lo declara en
 `POST /api/estimate` con `{"texto": "...", "motor": "auto" | "reglas"}`.
 Respuesta real del servicio, verificada con `curl`:
 
-```json
-{"data":{"items":[
-  {"etiqueta":"Carne de res","cantidad":1,"unidad":"porcion","kgCO2e":9,"verificado":false},
-  {"etiqueta":"Bus urbano","cantidad":20,"unidad":"km","kgCO2e":2,"verificado":false}],
- "totalKgCO2e":11,"porCategoria":{"transporte":2,"alimentacion":9,"energia":0},
- "equivaleAKmEnCarro":64.7,"sinReconocer":[],"motor":"reglas",
- "advertencias":["Los factores de emisión de este prototipo son órdenes de magnitud sin verificar..."]}}
 ```
+Hoy usamos 5 camionetas de reparto y gastamos 200kWh de luz
+→ total: 82 kg CO2e | equivale a 482,4 km en carro
+   Camioneta de reparto (diésel) | 200 km  | 50 kg | 5 x 40 km asumidos por vehiculo
+   Electricidad                  | 200 kWh | 32 kg
+   mayor contribuyente: Camioneta de reparto (diésel)
+   > cambiar la camioneta de reparto por una eléctrica  → −40 kg (48,8%)
+   > apagar equipos en horas muertas y pasar a LED      → −4,8 kg (5,9%)
+```
+
+La respuesta trae `items` (con `detalle` cuando hubo un supuesto),
+`totalKgCO2e`, `porCategoria`, `recomendaciones`, `mayorContribuyente`,
+`sinReconocer`, `advertencias` y `motor`.
 
 `GET /api/estimate` responde qué motor está activo.
 
-## Entregables de la tarea
+## Entregables del capstone
+
+- **Proyecto vivo:** la app publicada en Replit (ver más abajo) y este
+  repositorio.
+- **Master Prompt:** [`docs/MASTER-PROMPT.md`](docs/MASTER-PROMPT.md).
+- **Bitácora:** [`docs/CAPSTONE-BITACORA.md`](docs/CAPSTONE-BITACORA.md) —
+  prompts, capturas, la funcionalidad de IA explicada y los dos errores reales
+  con el prompt que los resolvió.
+- **Funcionalidad de IA:** comprensión del lenguaje natural (dos motores
+  intercambiables) y motor de recomendaciones con el ahorro calculado.
+
+## Entregables del trabajo anterior
 
 - **Código fuente funcional:** este repositorio (`app/`, `lib/`, `tests/`).
 - **`.cursorrules`:** reglas del agente. Se incluye también
