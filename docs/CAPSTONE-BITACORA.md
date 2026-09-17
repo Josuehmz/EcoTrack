@@ -3,9 +3,10 @@
 **Producto:** MVP para que un negocio pequeño estime su huella de carbono
 escribiendo su día en una frase.
 **Fecha:** 2026-09-13 · **Agente principal:** Claude Opus 5 (Claude Code) ·
-**Entorno:** Cursor como editor con reglas de proyecto, Replit para publicar.
+**Entorno:** Cursor como editor con reglas de proyecto; Replit y Vercel para
+publicar.
 **Repositorio:** https://github.com/Josuehmz/EcoTrack ·
-**App publicada:** https://eco-track--josuehernande15.replit.app
+**App en vivo:** https://eco-track-gold.vercel.app
 
 > **De dónde parte.** Este capstone no arrancó en blanco: reutiliza el motor de
 > cálculo, el analizador de lenguaje natural y la suite de pruebas del prototipo
@@ -227,11 +228,32 @@ bucle de vibe coding no se puede saltar.
 
 ---
 
-## 5. Capturas del proceso
+## 5. Capturas
 
-`docs/capturas/` contiene el entorno de trabajo: el agente de Replit importando
-y publicando el proyecto, y la app publicada, en ambos casos con las reglas del
-agente abiertas en Cursor al lado.
+### El producto terminado, en producción
+
+Desplegado en Vercel: **https://eco-track-gold.vercel.app**
+
+El caso del enunciado. Nótese lo que la pantalla hace explícito: el supuesto
+(*5 x 40 km asumidos por vehículo*), el motor que respondió (*REGLAS*), qué
+actividad manda y las dos recomendaciones con su ahorro calculado.
+
+![EcoTrack AI en Vercel: 5 camionetas y 200 kWh dan 82 kg CO2e](capturas/app-vercel-flota-y-energia.png)
+
+El segundo mensaje del mismo hilo: 40 domicilios convertidos a 240 km de moto,
+25 kg de residuos, y reciclar como la recomendación de mayor ahorro. El
+marcador de arriba acumula el día.
+
+![EcoTrack AI en Vercel: 40 domicilios y 25 kg de basura dan 36,5 kg CO2e](capturas/app-vercel-domicilios-y-residuos.png)
+
+Las cifras de las dos pantallas —82 kg y 36,5 kg— son las mismas que devuelve el
+endpoint por `curl` y las que fijan las pruebas. La segunda es además la
+evidencia del arreglo del error 2: dos ítems, no tres.
+
+### El entorno de trabajo
+
+El agente de Replit importando y publicando el proyecto, y la app publicada, en
+ambos casos con las reglas del agente abiertas en Cursor al lado.
 
 ![Cursor y el agente de Replit](capturas/cursor-y-replit-agente.png)
 
@@ -287,5 +309,3 @@ de ejecutar el servicio.
   entorno de desarrollo, así que ese camino compila y está tipado pero no está
   probado contra la API. Lo verificado de punta a punta es el motor por reglas.
 - El **video demo** (opcional en el enunciado) no está grabado.
-- Las capturas son del entorno Cursor + Replit; **faltan capturas del chat de
-  negocio en funcionamiento**, que se toman con la app corriendo.

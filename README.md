@@ -1,5 +1,6 @@
 # EcoTrack
 
+**App en vivo:** https://eco-track-gold.vercel.app ·
 **Repositorio:** https://github.com/Josuehmz/EcoTrack
 
 MVP que estima la huella de carbono a partir de una frase en lenguaje natural,
@@ -87,26 +88,39 @@ La respuesta trae `items` (con `detalle` cuando hubo un supuesto),
 - **`.replit`:** configuración del Repl para correr y desplegar.
 - **Capturas:** `docs/capturas/`, Cursor y Replit operando juntos.
 
-## Despliegue en Replit
+## Despliegues
 
-- **Repl:** https://replit.com/@JosueHernande15/EcoTrack
-- **App publicada:** https://eco-track--josuehernande15.replit.app
-  (despliegue Autoscale, 2 vCPU / 4 GiB, región South America, visibilidad
-  pública)
+- **Vercel — despliegue actual del capstone:** https://eco-track-gold.vercel.app
+- **Replit — primer despliegue, del trabajo anterior:**
+  [Repl](https://replit.com/@JosueHernande15/EcoTrack) ·
+  [app](https://eco-track--josuehernande15.replit.app). El Repl se creó
+  importando este repositorio y su agente adaptó el arranque a su entorno; puede
+  estar sirviendo una versión anterior. La fuente de verdad del código es este
+  repositorio.
 
-El Repl se creó importando este repositorio; el agente de Replit adaptó el
-arranque del proyecto a su entorno, así que lo que corre allá puede diferir en
-la capa de infraestructura de lo que hay en `main`. La fuente de verdad del
-código es este repositorio.
+## Capturas
 
-## Capturas: Cursor y Replit en conjunto
+### La app en producción (Vercel)
+
+El caso del enunciado — flota con el supuesto visible, energía, y las dos
+recomendaciones con su ahorro calculado:
+
+![EcoTrack AI en Vercel: 5 camionetas y 200 kWh dan 82 kg CO2e](docs/capturas/app-vercel-flota-y-energia.png)
+
+Domicilios convertidos a kilómetros y residuos al relleno, con reciclar como la
+recomendación de mayor ahorro:
+
+![EcoTrack AI en Vercel: 40 domicilios y 25 kg de basura dan 36,5 kg CO2e](docs/capturas/app-vercel-domicilios-y-residuos.png)
+
+Las dos pantallas coinciden con lo que devuelve el endpoint por `curl` y con lo
+que fijan las pruebas: 82 kg y 36,5 kg.
+
+### El entorno de trabajo (Cursor y Replit)
 
 El agente de Replit importando y publicando el proyecto, con `.cursorrules`
 abierto en Cursor al lado:
 
 ![Cursor y el agente de Replit trabajando en conjunto](docs/capturas/cursor-y-replit-agente.png)
-
-La app publicada en su URL de Replit, con el mismo archivo de reglas en Cursor:
 
 ![La app publicada en Replit junto a Cursor](docs/capturas/cursor-y-replit-app.png)
 
